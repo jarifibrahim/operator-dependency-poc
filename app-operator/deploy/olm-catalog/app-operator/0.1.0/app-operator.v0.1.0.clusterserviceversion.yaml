@@ -1,0 +1,116 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    capabilities: Basic Install
+  creationTimestamp: null
+  name: app-operator.v0.1.0
+  namespace: myproject
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - kind: AppService
+      name: appservices.app.example.com
+      version: v1alpha1
+      description: Placeholder description
+      displayName: App Operator
+    required:
+    - kind: DependantService
+      name: dependantService.dependant.example.com
+      version: v1alpha1
+      description:  Dependant CRD description
+      displayName: Dependant CRD Name
+  description: Placeholder description
+  displayName: App Operator
+  install:
+    spec:
+      deployments:
+      - name: app-operator
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              name: app-operator
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                name: app-operator
+            spec:
+              containers:
+              - command:
+                - app-operator
+                env:
+                - name: WATCH_NAMESPACE
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.namespace
+                - name: POD_NAME
+                  valueFrom:
+                    fieldRef:
+                      fieldPath: metadata.name
+                - name: OPERATOR_NAME
+                  value: app-operator
+                image: my-operator.0.1.0
+                imagePullPolicy: Never
+                name: app-operator
+                resources: {}
+              serviceAccountName: app-operator
+      permissions:
+      - rules:
+        - apiGroups:
+          - ""
+          resources:
+          - pods
+          - services
+          - endpoints
+          - persistentvolumeclaims
+          - events
+          - configmaps
+          - secrets
+          verbs:
+          - '*'
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
+        - apiGroups:
+          - apps
+          resources:
+          - deployments
+          - daemonsets
+          - replicasets
+          - statefulsets
+          verbs:
+          - '*'
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
+          - app.example.com
+          resources:
+          - '*'
+          verbs:
+          - '*'
+        serviceAccountName: app-operator
+    strategy: deployment
+  installModes:
+  - supported: true
+    type: OwnNamespace
+  - supported: true
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  maturity: alpha
+  provider: {}
+  version: 0.1.0

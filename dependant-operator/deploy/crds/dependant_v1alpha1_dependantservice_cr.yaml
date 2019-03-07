@@ -1,0 +1,7 @@
+apiVersion: dependant.example.com/v1alpha1
+kind: DependantService
+metadata:
+  name: example-dependantservice
+spec:
+  # Add fields here
+  size: 3
