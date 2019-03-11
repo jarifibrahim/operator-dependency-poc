@@ -1,0 +1,311 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devopsconsole
+  namespace: olm
+data:
+  clusterServiceVersions: |2-
+    - apiVersion: operators.coreos.com/v1alpha1
+      kind: ClusterServiceVersion
+      metadata:
+        annotations:
+          capabilities: Basic Install
+        creationTimestamp: null
+        name: app-operator.v0.1.0
+        namespace: placeholder
+      spec:
+        apiservicedefinitions: {}
+        customresourcedefinitions:
+          owned:
+          - kind: AppService
+            name: appservices.app.example.com
+            version: v1alpha1
+            displayName: App Operator Owned CRD
+            description: Description of App Operator Owned CRD
+          required:
+          - kind: DependantService
+            name: dependantservices.dependant.example.com
+            version: v1alpha1
+            displayName: Dependant Operator Owned CRD
+            description: Description of Dependant Operator Owned CRD
+        description: Placeholder description
+        displayName: App Operator
+        install:
+          spec:
+            deployments:
+            - name: app-operator
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    name: app-operator
+                strategy: {}
+                template:
+                  metadata:
+                    creationTimestamp: null
+                    labels:
+                      name: app-operator
+                  spec:
+                    containers:
+                    - command:
+                      - app-operator
+                      env:
+                      - name: WATCH_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                      - name: POD_NAME
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.name
+                      - name: OPERATOR_NAME
+                        value: app-operator
+                      image: jarifibrahim/app-operator.0.1.0
+                      imagePullPolicy: Always
+                      name: app-operator
+                      resources: {}
+                    serviceAccountName: app-operator
+            permissions:
+            - rules:
+              - apiGroups:
+                - ""
+                resources:
+                - pods
+                - services
+                - endpoints
+                - persistentvolumeclaims
+                - events
+                - configmaps
+                - secrets
+                verbs:
+                - '*'
+              - apiGroups:
+                - ""
+                resources:
+                - namespaces
+                verbs:
+                - get
+              - apiGroups:
+                - apps
+                resources:
+                - deployments
+                - daemonsets
+                - replicasets
+                - statefulsets
+                verbs:
+                - '*'
+              - apiGroups:
+                - monitoring.coreos.com
+                resources:
+                - servicemonitors
+                verbs:
+                - get
+                - create
+              - apiGroups:
+                - app.example.com
+                resources:
+                - '*'
+                verbs:
+                - '*'
+              serviceAccountName: app-operator
+          strategy: deployment
+        installModes:
+        - supported: true
+          type: OwnNamespace
+        - supported: true
+          type: SingleNamespace
+        - supported: false
+          type: MultiNamespace
+        - supported: true
+          type: AllNamespaces
+        maturity: alpha
+        provider: {}
+        version: 0.1.0
+    - apiVersion: operators.coreos.com/v1alpha1
+      kind: ClusterServiceVersion
+      metadata:
+        annotations:
+          capabilities: Basic Install
+        creationTimestamp: null
+        name: dependant-operator.v0.1.0
+        namespace: placeholder
+      spec:
+        apiservicedefinitions: {}
+        customresourcedefinitions:
+          owned:
+          - kind: DependantService
+            name: dependantservices.dependant.example.com
+            version: v1alpha1
+            displayName: Dependant Operator CRD
+            description: Dependant operation CRD description
+        description: Placeholder description
+        displayName: Dependant Operator
+        install:
+          spec:
+            deployments:
+            - name: dependant-operator
+              spec:
+                replicas: 1
+                selector:
+                  matchLabels:
+                    name: dependant-operator
+                strategy: {}
+                template:
+                  metadata:
+                    creationTimestamp: null
+                    labels:
+                      name: dependant-operator
+                  spec:
+                    containers:
+                    - command:
+                      - dependant-operator
+                      env:
+                      - name: WATCH_NAMESPACE
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.namespace
+                      - name: POD_NAME
+                        valueFrom:
+                          fieldRef:
+                            fieldPath: metadata.name
+                      - name: OPERATOR_NAME
+                        value: dependant-operator
+                      image: jarifibrahim/dependant-operator.0.1.0
+                      imagePullPolicy: Always
+                      name: dependant-operator
+                      resources: {}
+                    serviceAccountName: dependant-operator
+            permissions:
+            - rules:
+              - apiGroups:
+                - ""
+                resources:
+                - pods
+                - services
+                - endpoints
+                - persistentvolumeclaims
+                - events
+                - configmaps
+                - secrets
+                verbs:
+                - '*'
+              - apiGroups:
+                - ""
+                resources:
+                - namespaces
+                verbs:
+                - get
+              - apiGroups:
+                - apps
+                resources:
+                - deployments
+                - daemonsets
+                - replicasets
+                - statefulsets
+                verbs:
+                - '*'
+              - apiGroups:
+                - monitoring.coreos.com
+                resources:
+                - servicemonitors
+                verbs:
+                - get
+                - create
+              - apiGroups:
+                - dependant.example.com
+                resources:
+                - '*'
+                verbs:
+                - '*'
+              serviceAccountName: dependant-operator
+          strategy: deployment
+        installModes:
+        - supported: true
+          type: OwnNamespace
+        - supported: true
+          type: SingleNamespace
+        - supported: false
+          type: MultiNamespace
+        - supported: true
+          type: AllNamespaces
+        maturity: alpha
+        provider: {}
+        version: 0.1.0
+  customResourceDefinitions: |2-
+      - apiVersion: apiextensions.k8s.io/v1beta1
+        kind: CustomResourceDefinition
+        metadata:
+          creationTimestamp: null
+          name: appservices.app.example.com
+        spec:
+          group: app.example.com
+          names:
+            kind: AppService
+            listKind: AppServiceList
+            plural: appservices
+            singular: appservice
+          scope: Namespaced
+          subresources:
+            status: {}
+          validation:
+            openAPIV3Schema:
+              properties:
+                apiVersion:
+                  type: string
+                kind:
+                  type: string
+                metadata:
+                  type: object
+                spec:
+                  type: object
+                status:
+                  type: object
+          version: v1alpha1
+          versions:
+          - name: v1alpha1
+            served: true
+            storage: true
+      - apiVersion: apiextensions.k8s.io/v1beta1
+        kind: CustomResourceDefinition
+        metadata:
+          creationTimestamp: null
+          name: dependantservices.dependant.example.com
+        spec:
+          group: dependant.example.com
+          names:
+            kind: DependantService
+            listKind: DependantServiceList
+            plural: dependantservices
+            singular: dependantservice
+          scope: Namespaced
+          subresources:
+            status: {}
+          validation:
+            openAPIV3Schema:
+              properties:
+                apiVersion:
+                  type: string
+                kind:
+                  type: string
+                metadata:
+                  type: object
+                spec:
+                  type: object
+                status:
+                  type: object
+          version: v1alpha1
+          versions:
+          - name: v1alpha1
+            served: true
+            storage: true
+
+  packages: |2-
+
+    - packageName: app-operator
+      channels:
+      - name: alpha
+        currentCSV: app-operator.v0.1.0
+    - packageName: dependant-operator
+      channels:
+      - name: alpha
+        currentCSV: dependant-operator.v0.1.0

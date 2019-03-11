@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: devops-console-catalog
+  namespace: olm
+spec:
+  configMap: devopsconsole
+  displayName: Devops Console Operators
+  publisher: Devops Console
+  sourceType: internal

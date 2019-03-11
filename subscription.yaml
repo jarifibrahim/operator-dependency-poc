@@ -1,0 +1,11 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  generateName: app-operator-
+  namespace: myproject
+spec:
+  source: devops-console-catalog
+  sourceNamespace: olm
+  name: app-operator
+  startingCSV: app-operator.v0.1.0
+  channel: alpha
